@@ -1,6 +1,6 @@
 local prometheus = require("lib/prometheus")
 
-local registry = prometheus.Registry.new()
+local registry = prometheus.Registry.new("factorio_")
 
 local gauge_players_connected = registry:new_gauge("players_connected", "Players connected")
 local gauge_players_total = registry:new_gauge("players_total", "Players total")
