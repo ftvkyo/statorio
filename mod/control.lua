@@ -10,9 +10,9 @@ local function on_player_change(event)
     gauge_players_total:set(#game.players)
 end
 
-local function collect()
-    -- helpers.write_file("statorio/game.prom", registry:collect(), false, 0)
-    helpers.write_file("statorio/game.prom", registry:collect(), false)
+local function collect_metrics()
+    -- helpers.write_file("statorio/game.prom", registry:collect_metrics(), false, 0)
+    helpers.write_file("statorio/game.prom", registry:collect_metrics(), false)
 end
 
 local function init()
@@ -22,10 +22,10 @@ local function init()
     script.on_event(defines.events.on_player_kicked, on_player_change)
     script.on_event(defines.events.on_player_banned, on_player_change)
 
-    script.on_nth_tick(300, collect)
+    script.on_nth_tick(300, collect_metrics)
 
     on_player_change()
-    collect()
+    collect_metrics()
 end
 
 script.on_init(init)

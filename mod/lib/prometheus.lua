@@ -81,7 +81,7 @@ function Gauge:set(value, label_values)
     self.label_values[key] = label_values
 end
 
-function Gauge:collect()
+function Gauge:collect_metrics()
     local result = {}
 
     table.insert(result, "# HELP " .. self.id .. " " .. escape_string(self.name))
@@ -137,10 +137,10 @@ function Registry:remove_id(id)
     end
 end
 
-function Registry:collect()
+function Registry:collect_metrics()
     local result = {}
     for _, collector in pairs(self.collectors) do
-        for _, metric in ipairs(collector:collect()) do
+        for _, metric in ipairs(collector:collect_metrics()) do
             table.insert(result, metric)
         end
         table.insert(result, "")
