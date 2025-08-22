@@ -29,4 +29,7 @@ local function init()
 end
 
 script.on_init(init)
+
+-- TODO: check if this is a legitimate use of `on_load`
+-- See https://lua-api.factorio.com/latest/classes/LuaBootstrap.html#on_load
 script.on_load(init)
