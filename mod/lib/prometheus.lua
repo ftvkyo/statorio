@@ -120,6 +120,66 @@ end
 
 -- ###
 
+local Counter = {}
+Counter.__index = Counter
+
+function Counter.new(id, name, labels)
+    validate_id(id)
+    validate_name(name)
+
+    local obj = {
+        id = id,
+        name = name,
+        labels = labels or {},
+        observations = {},
+        label_values = {},
+    }
+
+    setmetatable(obj, Counter)
+
+    return obj
+end
+
+function Counter:increment(num, label_values)
+    if type(num) ~= "number" then
+        error("Missing number parameter `num`")
+    end
+
+    if num < 0 then
+        error("Tried to decrement a counter")
+    end
+
+    label_values = label_values or {}
+    local key = table.concat(label_values, "\0")
+    local old_value = self.observations[key] or 0
+    self.observations[key] = old_value + num
+    self.label_values[key] = label_values
+end
+
+function Counter:collect_metrics()
+    local result = {}
+
+    if next(self.observations) == nil then
+        return {}
+    end
+
+    table.insert(result, "# HELP " .. self.id .. " " .. escape_string(self.name))
+    table.insert(result, "# TYPE " .. self.id .. " counter")
+
+    for key, observation in pairs(self.observations) do
+        local label_values = self.label_values[key]
+        local prefix = self.id
+        local labels = zip(self.labels, label_values)
+
+        local str = prefix .. labels_to_string(labels) .. " " .. metric_to_string(observation)
+        table.insert(result, str)
+    end
+
+    return result
+end
+
+-- ###
+
 local Registry = {}
 Registry.__index = Registry
 
@@ -146,14 +206,16 @@ function Registry:new_gauge(id, name, labels)
     return collector
 end
 
-function Registry:remove_id(id)
+function Registry:new_counter(id, name, labels)
     local id_long = self.id_prefix .. id
 
     if self.collectors[id_long] ~= nil then
-        table.remove(self.collectors, id_long)
-    else
-        error("No such collector id `" .. id_long .. "`")
+        error("Collector id `" .. id_long .. "` is already registered")
     end
+
+    local collector = Counter.new(id_long, name, labels)
+    self.collectors[id_long] = collector
+    return collector
 end
 
 function Registry:collect_metrics()
