@@ -5,7 +5,7 @@ local registry = prometheus.Registry.new("factorio_")
 local gauge_players_connected = registry:new_gauge("players_connected", "Players connected")
 local gauge_players_total = registry:new_gauge("players_total", "Players total")
 
-local function refresh_players(event)
+local function on_player_change(event)
     gauge_players_connected:set(#game.connected_players)
     gauge_players_total:set(#game.players)
 end
@@ -16,15 +16,15 @@ local function collect()
 end
 
 local function init()
-    script.on_event(defines.events.on_player_joined_game, refresh_players)
-    script.on_event(defines.events.on_player_left_game, refresh_players)
-    script.on_event(defines.events.on_player_removed, refresh_players)
-    script.on_event(defines.events.on_player_kicked, refresh_players)
-    script.on_event(defines.events.on_player_banned, refresh_players)
+    script.on_event(defines.events.on_player_joined_game, on_player_change)
+    script.on_event(defines.events.on_player_left_game, on_player_change)
+    script.on_event(defines.events.on_player_removed, on_player_change)
+    script.on_event(defines.events.on_player_kicked, on_player_change)
+    script.on_event(defines.events.on_player_banned, on_player_change)
 
     script.on_nth_tick(300, collect)
 
-    refresh_players()
+    on_player_change()
     collect()
 end
 
