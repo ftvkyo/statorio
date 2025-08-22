@@ -23,6 +23,9 @@ local function init()
     script.on_event(defines.events.on_player_banned, refresh_players)
 
     script.on_nth_tick(300, collect)
+
+    refresh_players()
+    collect()
 end
 
 script.on_init(init)
