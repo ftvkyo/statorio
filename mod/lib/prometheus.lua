@@ -89,7 +89,7 @@ function Gauge:collect()
 
     for key, observation in pairs(self.observations) do
         local label_values = self.label_values[key]
-        local prefix = self.name
+        local prefix = self.id
         local labels = zip(self.labels, label_values)
 
         local str = prefix .. labels_to_string(labels) .. " " .. metric_to_string(observation)
