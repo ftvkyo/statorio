@@ -45,17 +45,32 @@ end
 
 -- ###
 
+local function validate_id(id)
+    local t = type(id)
+    if t ~= "string" then
+        error("Parameter `id` is not a string, but is a `" .. t .. "`")
+    end
+
+    for _ in id:gmatch("%s") do
+        error("Parameter `id` must not contain spaces, but it is `" .. id .. "`")
+    end
+end
+
+local function validate_name(name)
+    local t = type(name)
+    if t ~= "string" then
+        error("Parameter `name` is not a string, but is a `" .. t .. "`")
+    end
+end
+
+-- ###
+
 local Gauge = {}
 Gauge.__index = Gauge
 
 function Gauge.new(id, name, labels)
-    if type(id) ~= "string" then
-        error("Missing string parameter `id`")
-    end
-
-    if type(name) ~= "string" then
-        error("Missing string parameter `name`")
-    end
+    validate_id(id)
+    validate_name(name)
 
     local obj = {
         id = id,
@@ -70,19 +85,23 @@ function Gauge.new(id, name, labels)
     return obj
 end
 
-function Gauge:set(value, label_values)
-    if type(value) ~= "number" then
-        error("Missing number parameter `val`")
+function Gauge:set(num, label_values)
+    if type(num) ~= "number" then
+        error("Missing number parameter `num`")
     end
 
     label_values = label_values or {}
     local key = table.concat(label_values, "\0")
-    self.observations[key] = value
+    self.observations[key] = num
     self.label_values[key] = label_values
 end
 
 function Gauge:collect_metrics()
     local result = {}
+
+    if next(self.observations) == nil then
+        return {}
+    end
 
     table.insert(result, "# HELP " .. self.id .. " " .. escape_string(self.name))
     table.insert(result, "# TYPE " .. self.id .. " gauge")
