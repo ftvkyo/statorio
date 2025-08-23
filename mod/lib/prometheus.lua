@@ -125,13 +125,26 @@ function Counter.new(id, name, label_names)
     return obj
 end
 
+function Counter:set(num, label_values)
+    assert(type(num) == "number")
+
+    local label_key = labels_to_key(self.label_names, label_values)
+    local old_num = self.observations[label_key] or 0
+
+    assert(num >= old_num, "Tried to decrement a counter")
+
+    self.observations[label_key] = num
+
+    storage.registry[self.id] = self.observations
+end
+
 function Counter:increment(num, label_values)
     assert(type(num) == "number")
     assert(num >= 0, "Tried to decrement a counter")
 
     local label_key = labels_to_key(self.label_names, label_values)
-    local old_value = self.observations[label_key] or 0
-    self.observations[label_key] = old_value + num
+    local old_num = self.observations[label_key] or 0
+    self.observations[label_key] = old_num + num
 
     storage.registry[self.id] = self.observations
 end

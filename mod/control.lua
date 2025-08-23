@@ -5,6 +5,11 @@ local registry = prometheus.Registry.new("factorio_")
 local gauges = {}
 local counters = {}
 
+local function collect_metrics()
+    -- helpers.write_file("statorio/game.prom", registry:collect_metrics(), false, 0)
+    helpers.write_file("statorio/game.prom", registry:collect_metrics(), false)
+end
+
 local function on_player_change(event)
     gauges.players_connected:set(#game.connected_players)
     gauges.players_total:set(#game.players)
@@ -14,15 +19,16 @@ local function on_player_died(event)
     counters.player_deaths:increment(1)
 end
 
-local function collect_metrics()
-    -- helpers.write_file("statorio/game.prom", registry:collect_metrics(), false, 0)
-    helpers.write_file("statorio/game.prom", registry:collect_metrics(), false)
+local function on_nth_tick(event)
+    counters.ticks_played:set(game.tick)
+    collect_metrics()
 end
 
 local function load()
     gauges.players_connected = registry:new_gauge("players_connected", "Players connected")
     gauges.players_total = registry:new_gauge("players_total", "Players total")
 
+    counters.ticks_played = registry:new_counter("ticks_played", "Ticks passed")
     counters.player_deaths = registry:new_counter("player_deaths", "Player deaths")
 
     script.on_event(defines.events.on_player_joined_game, on_player_change)
@@ -33,7 +39,7 @@ local function load()
 
     script.on_event(defines.events.on_player_died, on_player_died)
 
-    script.on_nth_tick(300, collect_metrics)
+    script.on_nth_tick(300, on_nth_tick)
 
     collect_metrics()
 end
