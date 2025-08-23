@@ -84,6 +84,28 @@ function Gauge:set(num, label_values)
     storage.registry[self.id] = self.observations
 end
 
+function Gauge:increment_by(num, label_values)
+    assert(type(num) == "number")
+    assert(num >= 0, "Tried to increment by a negative value")
+
+    local label_key = labels_to_key(self.label_names, label_values)
+    local old_num = self.observations[label_key] or 0
+    self.observations[label_key] = old_num + num
+
+    storage.registry[self.id] = self.observations
+end
+
+function Gauge:decrement_by(num, label_values)
+    assert(type(num) == "number")
+    assert(num >= 0, "Tried to dercement by a negative value")
+
+    local label_key = labels_to_key(self.label_names, label_values)
+    local old_num = self.observations[label_key] or 0
+    self.observations[label_key] = old_num - num
+
+    storage.registry[self.id] = self.observations
+end
+
 function Gauge:collect_metrics()
     local result = {}
 
@@ -138,7 +160,7 @@ function Counter:set(num, label_values)
     storage.registry[self.id] = self.observations
 end
 
-function Counter:increment(num, label_values)
+function Counter:increment_by(num, label_values)
     assert(type(num) == "number")
     assert(num >= 0, "Tried to decrement a counter")
 

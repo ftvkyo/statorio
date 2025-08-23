@@ -16,7 +16,22 @@ local function on_player_change(event)
 end
 
 local function on_player_died(event)
-    counters.player_deaths:increment(1)
+    counters.player_deaths:increment_by(1)
+end
+
+local function on_tile_built(event)
+    local tile_name = event.tile.name
+    local surface = event.surface_index
+
+    gauges.area_paved:increment_by(#event.tiles, { tile_name, surface })
+end
+
+local function on_tile_mined(event)
+    local surface = event.surface_index
+    for _, tile in ipairs(event.tiles) do
+        local tile_name = tile.old_tile.name
+        gauges.area_paved:decrement_by(1, { tile_name, surface })
+    end
 end
 
 local function on_nth_tick(event)
@@ -28,6 +43,8 @@ local function load()
     gauges.players_connected = registry:new_gauge("players_connected", "Players connected")
     gauges.players_total = registry:new_gauge("players_total", "Players total")
 
+    gauges.area_paved = registry:new_gauge("area_paved", "Area paved", { "tile", "surface" })
+
     counters.ticks_played = registry:new_counter("ticks_played", "Ticks passed")
     counters.player_deaths = registry:new_counter("player_deaths", "Player deaths")
 
@@ -38,6 +55,12 @@ local function load()
     script.on_event(defines.events.on_player_banned, on_player_change)
 
     script.on_event(defines.events.on_player_died, on_player_died)
+
+    script.on_event(defines.events.on_player_built_tile, on_tile_built)
+    script.on_event(defines.events.on_robot_built_tile, on_tile_built)
+
+    script.on_event(defines.events.on_player_mined_tile, on_tile_mined)
+    script.on_event(defines.events.on_robot_mined_tile, on_tile_mined)
 
     script.on_nth_tick(300, on_nth_tick)
 
