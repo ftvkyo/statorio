@@ -61,10 +61,12 @@ function Gauge.new(id, name, label_names)
     validate_id(id)
     validate_name(name)
 
+    local observations_cache = storage.registry[id]
+
     local obj = {
         id = id,
         name = name,
-        observations = {},
+        observations = observations_cache or {},
         label_names = label_names,
     }
 
@@ -78,6 +80,8 @@ function Gauge:set(num, label_values)
 
     local label_key = labels_to_key(self.label_names, label_values)
     self.observations[label_key] = num
+
+    storage.registry[self.id] = self.observations
 end
 
 function Gauge:collect_metrics()
@@ -107,10 +111,12 @@ function Counter.new(id, name, label_names)
     validate_id(id)
     validate_name(name)
 
+    local observations_cache = storage.registry[id]
+
     local obj = {
         id = id,
         name = name,
-        observations = {},
+        observations = observations_cache or {},
         label_names = label_names,
     }
 
@@ -126,6 +132,8 @@ function Counter:increment(num, label_values)
     local label_key = labels_to_key(self.label_names, label_values)
     local old_value = self.observations[label_key] or 0
     self.observations[label_key] = old_value + num
+
+    storage.registry[self.id] = self.observations
 end
 
 function Counter:collect_metrics()
