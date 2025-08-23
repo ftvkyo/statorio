@@ -83,12 +83,12 @@ end
 function Gauge:collect_metrics()
     local result = {}
 
-    if next(self.observations) == nil then
-        return {}
-    end
-
     table.insert(result, "# HELP " .. self.id .. " " .. escape_string(self.name))
     table.insert(result, "# TYPE " .. self.id .. " gauge")
+
+    if next(self.observations) == nil then
+        table.insert(result, self.id .. " 0")
+    end
 
     for label_key, observation in pairs(self.observations) do
         local str = self.id .. label_key .. " " .. metric_to_string(observation)
@@ -131,12 +131,12 @@ end
 function Counter:collect_metrics()
     local result = {}
 
-    if next(self.observations) == nil then
-        return {}
-    end
-
     table.insert(result, "# HELP " .. self.id .. " " .. escape_string(self.name))
     table.insert(result, "# TYPE " .. self.id .. " counter")
+
+    if next(self.observations) == nil then
+        table.insert(result, self.id .. " 0")
+    end
 
     for label_key, observation in pairs(self.observations) do
         local str = self.id .. label_key .. " " .. metric_to_string(observation)
