@@ -21,16 +21,16 @@ end
 
 local function on_tile_built(event)
     local tile_name = event.tile.name
-    local surface = event.surface_index
+    local surface_name = game.get_surface(event.surface_index).name
 
-    gauges.area_paved:increment_by(#event.tiles, { tile_name, surface })
+    gauges.area_paved:increment_by(#event.tiles, { tile_name, surface_name })
 end
 
 local function on_tile_mined(event)
-    local surface = event.surface_index
+    local surface_name = game.get_surface(event.surface_index).name
     for _, tile in ipairs(event.tiles) do
         local tile_name = tile.old_tile.name
-        gauges.area_paved:decrement_by(1, { tile_name, surface })
+        gauges.area_paved:decrement_by(1, { tile_name, surface_name })
     end
 end
 
