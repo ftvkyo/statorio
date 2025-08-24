@@ -34,9 +34,16 @@ local function on_tile_mined(event)
     end
 end
 
-local function on_nth_tick(event)
+local function on_300th_tick(event)
     counters.ticks_played:set(game.tick)
     collect_metrics()
+end
+
+local function on_600th_tick(event)
+    for _, surface in pairs(game.surfaces) do
+        local pollution = surface:get_total_pollution()
+        gauges.pollution:set(pollution, { surface.name })
+    end
 end
 
 local function load()
@@ -44,6 +51,8 @@ local function load()
     gauges.players_total = registry:new_gauge("players_total", "Players total")
 
     gauges.area_paved = registry:new_gauge("area_paved", "Area paved", { "tile", "surface" })
+
+    gauges.pollution = registry:new_gauge("pollution", "Total pollution", { "surface" })
 
     counters.ticks_played = registry:new_counter("ticks_played", "Ticks passed")
     counters.player_deaths = registry:new_counter("player_deaths", "Player deaths")
@@ -62,7 +71,8 @@ local function load()
     script.on_event(defines.events.on_player_mined_tile, on_tile_mined)
     script.on_event(defines.events.on_robot_mined_tile, on_tile_mined)
 
-    script.on_nth_tick(300, on_nth_tick)
+    script.on_nth_tick(300, on_300th_tick)
+    script.on_nth_tick(600, on_600th_tick)
 
     collect_metrics()
 end
