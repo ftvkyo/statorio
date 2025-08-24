@@ -43,6 +43,16 @@ local function on_600th_tick(event)
     for _, surface in pairs(game.surfaces) do
         local pollution = surface:get_total_pollution()
         gauges.pollution:set(pollution, { surface.name })
+
+        local pollution_statistics = game.get_pollution_statistics(surface)
+
+        for name, num in pairs(pollution_statistics.input_counts) do
+            gauges.pollution_produced:set(num, { name, surface.name })
+        end
+
+        for name, num in pairs(pollution_statistics.output_counts) do
+            gauges.pollution_consumed:set(num, { name, surface.name })
+        end
     end
 end
 
@@ -52,7 +62,9 @@ local function load()
 
     gauges.area_paved = registry:new_gauge("area_paved", "Area paved", { "tile", "surface" })
 
-    gauges.pollution = registry:new_gauge("pollution", "Total pollution", { "surface" })
+    gauges.pollution = registry:new_gauge("pollution", "Pollution level", { "surface" })
+    gauges.pollution_produced = registry:new_gauge("pollution_produced", "Pollution produced", { "name", "surface" })
+    gauges.pollution_consumed = registry:new_gauge("pollution_consumed", "Pollution consumed", { "name", "surface" })
 
     counters.ticks_played = registry:new_counter("ticks_played", "Ticks passed")
     counters.player_deaths = registry:new_counter("player_deaths", "Player deaths")
