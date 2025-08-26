@@ -10,15 +10,18 @@ local function collect_metrics()
     helpers.write_file("statorio/game.prom", registry:collect_metrics(), false)
 end
 
+--- @param event EventData.on_player_joined_game|EventData.on_player_left_game|EventData.on_player_removed|EventData.on_player_kicked|EventData.on_player_banned|EventData.on_player_unbanned
 local function on_player_change(event)
     gauges.players_connected:set(#game.connected_players)
     gauges.players_total:set(#game.players)
 end
 
+--- @param event EventData.on_player_died
 local function on_player_died(event)
     counters.player_deaths:increment_by(1)
 end
 
+--- @param event EventData.on_player_built_tile|EventData.on_robot_built_tile
 local function on_tile_built(event)
     local tile_name = event.tile.name
     local surface_name = game.get_surface(event.surface_index).name
@@ -26,6 +29,7 @@ local function on_tile_built(event)
     gauges.area_paved:increment_by(#event.tiles, { tile_name, surface_name })
 end
 
+--- @param event EventData.on_player_mined_tile|EventData.on_robot_mined_tile
 local function on_tile_mined(event)
     local surface_name = game.get_surface(event.surface_index).name
     for _, tile in ipairs(event.tiles) do
@@ -34,11 +38,13 @@ local function on_tile_mined(event)
     end
 end
 
+--- @param event NthTickEventData
 local function on_300th_tick(event)
     counters.ticks_played:set(game.tick)
     collect_metrics()
 end
 
+--- @param event NthTickEventData
 local function on_600th_tick(event)
     for _, surface in pairs(game.surfaces) do
         local pollution = surface:get_total_pollution()
