@@ -75,24 +75,6 @@ local function load()
     counters.ticks_played = registry:new_counter("ticks_played", "Ticks passed")
     counters.player_deaths = registry:new_counter("player_deaths", "Player deaths")
 
-    script.on_event(defines.events.on_player_joined_game, on_player_change)
-    script.on_event(defines.events.on_player_left_game, on_player_change)
-    script.on_event(defines.events.on_player_removed, on_player_change)
-    script.on_event(defines.events.on_player_kicked, on_player_change)
-    script.on_event(defines.events.on_player_banned, on_player_change)
-    script.on_event(defines.events.on_player_unbanned, on_player_change)
-
-    script.on_event(defines.events.on_player_died, on_player_died)
-
-    script.on_event(defines.events.on_player_built_tile, on_tile_built)
-    script.on_event(defines.events.on_robot_built_tile, on_tile_built)
-
-    script.on_event(defines.events.on_player_mined_tile, on_tile_mined)
-    script.on_event(defines.events.on_robot_mined_tile, on_tile_mined)
-
-    script.on_nth_tick(300, on_300th_tick)
-    script.on_nth_tick(600, on_600th_tick)
-
     collect_metrics()
 end
 
@@ -103,6 +85,24 @@ local function init()
 
     load()
 end
+
+script.on_event(defines.events.on_player_joined_game, on_player_change)
+script.on_event(defines.events.on_player_left_game, on_player_change)
+script.on_event(defines.events.on_player_removed, on_player_change)
+script.on_event(defines.events.on_player_kicked, on_player_change)
+script.on_event(defines.events.on_player_banned, on_player_change)
+script.on_event(defines.events.on_player_unbanned, on_player_change)
+
+script.on_event(defines.events.on_player_died, on_player_died)
+
+script.on_event(defines.events.on_player_built_tile, on_tile_built)
+script.on_event(defines.events.on_robot_built_tile, on_tile_built)
+
+script.on_event(defines.events.on_player_mined_tile, on_tile_mined)
+script.on_event(defines.events.on_robot_mined_tile, on_tile_mined)
+
+script.on_nth_tick(300, on_300th_tick)
+script.on_nth_tick(600, on_600th_tick)
 
 script.on_init(init)
 
