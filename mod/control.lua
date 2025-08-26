@@ -74,6 +74,7 @@ local function load()
     script.on_event(defines.events.on_player_removed, on_player_change)
     script.on_event(defines.events.on_player_kicked, on_player_change)
     script.on_event(defines.events.on_player_banned, on_player_change)
+    script.on_event(defines.events.on_player_unbanned, on_player_change)
 
     script.on_event(defines.events.on_player_died, on_player_died)
 
