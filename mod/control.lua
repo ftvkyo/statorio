@@ -10,7 +10,12 @@ local function collect_metrics()
     helpers.write_file("statorio/game.prom", registry:collect_metrics(), false)
 end
 
---- @param event EventData.on_player_joined_game|EventData.on_player_left_game|EventData.on_player_removed|EventData.on_player_kicked|EventData.on_player_banned|EventData.on_player_unbanned
+--- @overload fun(event:EventData.on_player_joined_game)
+--- @overload fun(event:EventData.on_player_left_game)
+--- @overload fun(event:EventData.on_player_removed)
+--- @overload fun(event:EventData.on_player_kicked)
+--- @overload fun(event:EventData.on_player_banned)
+--- @overload fun(event:EventData.on_player_unbanned)
 local function on_player_change(event)
     gauges.players_connected:set(#game.connected_players)
     gauges.players_total:set(#game.players)
@@ -22,7 +27,8 @@ local function on_player_died(event)
     counters.player_deaths:increment_by(1, { player_name })
 end
 
---- @param event EventData.on_player_built_tile|EventData.on_robot_built_tile
+--- @overload fun(event:EventData.on_player_built_tile)
+--- @overload fun(event:EventData.on_robot_built_tile)
 local function on_tile_built(event)
     local tile_name = event.tile.name
     local surface_name = game.get_surface(event.surface_index).name
@@ -30,7 +36,8 @@ local function on_tile_built(event)
     gauges.area_paved:increment_by(#event.tiles, { tile_name, surface_name })
 end
 
---- @param event EventData.on_player_mined_tile|EventData.on_robot_mined_tile
+--- @overload fun(event:EventData.on_player_mined_tile)
+--- @overload fun(event:EventData.on_robot_mined_tile)
 local function on_tile_mined(event)
     local surface_name = game.get_surface(event.surface_index).name
     for _, tile in ipairs(event.tiles) do
@@ -39,12 +46,14 @@ local function on_tile_mined(event)
     end
 end
 
+--- Every 1 second
 --- @param event NthTickEventData
-local function on_300th_tick(event)
+local function on_60th_tick(event)
     counters.ticks_played:set(game.tick)
     collect_metrics()
 end
 
+--- Every 10 seconds
 --- @param event NthTickEventData
 local function on_600th_tick(event)
     for _, surface in pairs(game.surfaces) do
@@ -102,7 +111,7 @@ script.on_event(defines.events.on_robot_built_tile, on_tile_built)
 script.on_event(defines.events.on_player_mined_tile, on_tile_mined)
 script.on_event(defines.events.on_robot_mined_tile, on_tile_mined)
 
-script.on_nth_tick(300, on_300th_tick)
+script.on_nth_tick(60, on_60th_tick)
 script.on_nth_tick(600, on_600th_tick)
 
 script.on_init(init)
