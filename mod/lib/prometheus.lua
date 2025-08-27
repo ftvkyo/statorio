@@ -1,20 +1,22 @@
+--- @param str string
 local function escape_string(str)
     return str:gsub("\\", "\\\\"):gsub("\n", "\\n"):gsub('"', '\\"')
 end
 
+--- @param names string[]
+--- @param values (string|number|boolean)[]
+--- @overload fun(names:nil, values:nil)
 local function labels_to_key(names, values)
     if names == nil and values == nil then
         return ""
     end
 
-    assert(type(names) == "table")
-    assert(type(values) == "table")
     assert(#names == #values, "The numbers of label names and label values differ")
 
     local result = {}
     for i = 1, #names do
         local name = names[i]
-        local value = string.format("%s", values[i])
+        local value = tostring(values[i])
 
         table.insert(result, name .. "=\"" .. escape_string(value) .. "\"")
     end
@@ -26,6 +28,7 @@ local function labels_to_key(names, values)
     return "{" .. table.concat(result, ",") .. "}"
 end
 
+--- @param value number
 local function metric_to_string(value)
     if value == math.huge then
         return "+Inf"
@@ -40,26 +43,29 @@ end
 
 -- ###
 
+--- @param id string
 local function validate_id(id)
-    assert(type(id) == "string")
-
     for _ in id:gmatch("%s") do
         error("Parameter `id` must not contain spaces, but it is `" .. id .. "`")
     end
 end
 
-local function validate_name(name)
-    assert(type(name) == "string")
-end
-
 -- ###
 
+--- @class Gauge
+--- @field id string
+--- @field name string
+--- @field observations number[]
+--- @field label_names? string[]
 local Gauge = {}
 Gauge.__index = Gauge
 
+--- @param id string
+--- @param name string
+--- @param label_names? string[]
+--- @return Gauge
 function Gauge.new(id, name, label_names)
     validate_id(id)
-    validate_name(name)
 
     local observations_cache = storage.registry[id]
 
@@ -75,17 +81,18 @@ function Gauge.new(id, name, label_names)
     return obj
 end
 
+--- @param num number
+--- @param label_values? (string|number|boolean)[]
 function Gauge:set(num, label_values)
-    assert(type(num) == "number")
-
     local label_key = labels_to_key(self.label_names, label_values)
     self.observations[label_key] = num
 
     storage.registry[self.id] = self.observations
 end
 
+--- @param num number
+--- @param label_values? (string|number|boolean)[]
 function Gauge:increment_by(num, label_values)
-    assert(type(num) == "number")
     assert(num >= 0, "Tried to increment by a negative value")
 
     local label_key = labels_to_key(self.label_names, label_values)
@@ -95,8 +102,9 @@ function Gauge:increment_by(num, label_values)
     storage.registry[self.id] = self.observations
 end
 
+--- @param num number
+--- @param label_values? (string|number|boolean)[]
 function Gauge:decrement_by(num, label_values)
-    assert(type(num) == "number")
     assert(num >= 0, "Tried to dercement by a negative value")
 
     local label_key = labels_to_key(self.label_names, label_values)
@@ -126,12 +134,20 @@ end
 
 -- ###
 
+--- @class Counter
+--- @field id string
+--- @field name string
+--- @field observations number[]
+--- @field label_names? string[]
 local Counter = {}
 Counter.__index = Counter
 
+--- @param id string
+--- @param name string
+--- @param label_names? string[]
+--- @return Counter
 function Counter.new(id, name, label_names)
     validate_id(id)
-    validate_name(name)
 
     local observations_cache = storage.registry[id]
 
@@ -147,9 +163,9 @@ function Counter.new(id, name, label_names)
     return obj
 end
 
+--- @param num number
+--- @param label_values? (string|number|boolean)[]
 function Counter:set(num, label_values)
-    assert(type(num) == "number")
-
     local label_key = labels_to_key(self.label_names, label_values)
     local old_num = self.observations[label_key] or 0
 
@@ -160,8 +176,9 @@ function Counter:set(num, label_values)
     storage.registry[self.id] = self.observations
 end
 
+--- @param num number
+--- @param label_values? (string|number|boolean)[]
 function Counter:increment_by(num, label_values)
-    assert(type(num) == "number")
     assert(num >= 0, "Tried to decrement a counter")
 
     local label_key = labels_to_key(self.label_names, label_values)
@@ -191,9 +208,14 @@ end
 
 -- ###
 
+--- @class Registry
+--- @field id_prefix string
+--- @field collectors (Gauge|Counter)[]
 local Registry = {}
 Registry.__index = Registry
 
+--- @param id_prefix? string
+--- @return Registry
 function Registry.new(id_prefix)
     local obj = {
         id_prefix = id_prefix or "",
@@ -205,6 +227,10 @@ function Registry.new(id_prefix)
     return obj
 end
 
+--- @param id string
+--- @param name string
+--- @param labels? string[]
+--- @return Gauge
 function Registry:new_gauge(id, name, labels)
     local id_long = self.id_prefix .. id
 
@@ -217,6 +243,10 @@ function Registry:new_gauge(id, name, labels)
     return collector
 end
 
+--- @param id string
+--- @param name string
+--- @param labels? string[]
+--- @return Counter
 function Registry:new_counter(id, name, labels)
     local id_long = self.id_prefix .. id
 
