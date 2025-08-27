@@ -18,7 +18,8 @@ end
 
 --- @param event EventData.on_player_died
 local function on_player_died(event)
-    counters.player_deaths:increment_by(1)
+    local player_name = game.get_player(event.player_index).name
+    counters.player_deaths:increment_by(1, { player_name })
 end
 
 --- @param event EventData.on_player_built_tile|EventData.on_robot_built_tile
@@ -73,7 +74,7 @@ local function load()
     gauges.pollution_consumed = registry:new_gauge("pollution_consumed", "Pollution consumed", { "name", "surface" })
 
     counters.ticks_played = registry:new_counter("ticks_played", "Ticks passed")
-    counters.player_deaths = registry:new_counter("player_deaths", "Player deaths")
+    counters.player_deaths = registry:new_counter("player_deaths", "Player deaths", { "name" })
 
     collect_metrics()
 end
