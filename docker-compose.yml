@@ -4,7 +4,7 @@ services:
         user: "1000:1000"
         command: "--collector.disable-defaults --collector.textfile --collector.textfile.directory=/textfiles"
         volumes:
-            - "${FACTORIO_DATA}/script-output/statorio:/textfiles"
+            - "${FACTORIO_APPDIR}/script-output/statorio:/textfiles"
         ports:
             - "9100"
 
