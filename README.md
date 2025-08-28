@@ -37,9 +37,18 @@ Here is what your `.vscode/settings.json` might look like after this:
 
 To install the mod, it's enough to copy the `mod` directory into your Factorio mods folder like this:
 
+All following sections assume you've set `FACTORIO_APP_DIR`:
 ```sh
+# Linux
+export FACTORIO_APPDIR=$HOME/.factorio
+# MacOS
+export FACTORIO_APPDIR="$HOME/Library/Application Support/factorio"
+```
+
+```sh
+mkdir -p "$FACTORIO_APPDIR/mods"
 # Note: the directory name MUST be `{mod-name}_{version}`.
-rm -rf ~/.factorio/mods/statorio_0.0.1 && cp -r mod ~/.factorio/mods/statorio_0.0.1
+rm -rf $FACTORIO_APPDIR/mods/statorio_0.0.1 && cp -r mod $FACTORIO_APPDIR/mods/statorio_0.0.1
 ```
 
 Then you can enable the mod in-game.
@@ -50,7 +59,7 @@ When the mod is loaded and a savefile is running, the mod will periodically writ
 You can display the contents of the file for debugging purposes:
 
 ```sh
-cat ~/.factorio/script-output/statorio/game.prom
+cat "$FACTORIO_APPDIR/script-output/statorio/game.prom"
 ```
 
 Once the file is there, you can set up Prometheus and Grafana:
@@ -61,13 +70,21 @@ Once the file is there, you can set up Prometheus and Grafana:
     - You might need to update `user: "1000:1000"` in the `docker-compose.yml` if your user id is not `1000`
 3. Open Grafana on http://localhost:3000
 
+## Tips
+
+### Cheating
+
+To trigger certain events while developing, you might want to use cheats in-game. This can be done by opening the console using `` ` ``, and entering `/cheat` twice.
+Once cheating is enabled, the following commands are useful:
+
+* `/cheat {surface-name}`, e.g `/cheat vulcanus`, `/cheat gleba`
 
 ## Attribution
 
 - `graftorio2` is released under MIT
-    - Commit [1b8ca38](https://github.com/remijouannet/graftorio2/tree/1b8ca38db745c9a8c720022213fd2d067c5600b8)
+  - Commit [1b8ca38](https://github.com/remijouannet/graftorio2/tree/1b8ca38db745c9a8c720022213fd2d067c5600b8)
 - A part of `graftorio2` under `/prometheus` is released under BSD-2
-    - Commit [1b8ca38, `/prometheus`](https://github.com/remijouannet/graftorio2/tree/1b8ca38db745c9a8c720022213fd2d067c5600b8/prometheus)
+  - Commit [1b8ca38, `/prometheus`](https://github.com/remijouannet/graftorio2/tree/1b8ca38db745c9a8c720022213fd2d067c5600b8/prometheus)
 
 Specific directories and files:
 
