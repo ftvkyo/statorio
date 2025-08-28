@@ -1,9 +1,13 @@
 # statorio
 
+This mod is based on [`graftorio2`](https://github.com/remijouannet/graftorio2).
+See [Attribution](#attribution).
+
 ## Intro
 
 - Make yourself familiar with the structure of Factorio [Application directory](https://wiki.factorio.com/Application_directory)
 - The instructions assume that the OS is Linux and the Application directory is `~/.factorio`
+
 
 ## Development
 
@@ -27,6 +31,7 @@ Here is what your `.vscode/settings.json` might look like after this:
     "Lua.workspace.checkThirdParty": "ApplyInMemory"
 }
 ```
+
 
 ## Installation
 
@@ -55,3 +60,18 @@ Once the file is there, you can set up Prometheus and Grafana:
 2. Run `docker-compose up`
     - You might need to update `user: "1000:1000"` in the `docker-compose.yml` if your user id is not `1000`
 3. Open Grafana on http://localhost:3000
+
+
+## Attribution
+
+- `graftorio2` is released under MIT
+    - Commit [1b8ca38](https://github.com/remijouannet/graftorio2/tree/1b8ca38db745c9a8c720022213fd2d067c5600b8)
+- A part of `graftorio2` under `/prometheus` is released under BSD-2
+    - Commit [1b8ca38, `/prometheus`](https://github.com/remijouannet/graftorio2/tree/1b8ca38db745c9a8c720022213fd2d067c5600b8/prometheus)
+
+Specific directories and files:
+
+- `config/` was copied verbatim from `graftorio2`
+- `mod/control.lua` was written from scratch but inspired by `graftorio2` code
+- `mod/lib/prometheus` contains the prometheus API based on the BSD-2 version from `graftorio2` but with significant modifications
+- `docker-compose.yml` was copied from `graftorio2` with minor modifications

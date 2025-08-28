@@ -1,4 +1,4 @@
-local prometheus = require("lib/prometheus")
+local prometheus = require("lib/prometheus/prometheus")
 
 local registry = prometheus.Registry.new("factorio_")
 
