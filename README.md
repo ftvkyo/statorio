@@ -45,7 +45,7 @@ export FACTORIO_APPDIR="$HOME/Library/Application Support/factorio"
 ```sh
 mkdir -p "$FACTORIO_APPDIR/mods"
 # Note: the directory name MUST be `{mod-name}_{version}`.
-rm -rf $FACTORIO_APPDIR/mods/statorio_0.0.1 && cp -r mod $FACTORIO_APPDIR/mods/statorio_0.0.1
+rm -rf "$FACTORIO_APPDIR/mods/statorio_0.0.1" && cp -r mod "$FACTORIO_APPDIR/mods/statorio_0.0.1"
 ```
 
 Then you can enable the mod in-game.
