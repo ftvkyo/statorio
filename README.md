@@ -57,6 +57,9 @@ You can display the contents of the file for debugging purposes:
 
 ```sh
 cat "$FACTORIO_APPDIR/script-output/statorio/game.prom"
+
+# You can also use `watch`:
+watch -n 1 cat "$FACTORIO_APPDIR/script-output/statorio/game.prom"
 ```
 
 Once the file is there, you can set up Prometheus and Grafana:
