@@ -76,6 +76,9 @@ local function load()
     gauges.players_connected = registry:new_gauge("players_connected", "Players connected")
     gauges.players_total = registry:new_gauge("players_total", "Players total")
 
+    -- Unfortunately, this goes wrong if a nuke destroys some tiles.
+    -- There seems to be no easy way to fix it other than recount all tiles on a surface when a nuke explodes.
+    -- So for now this is allowed to get out of sync.
     gauges.area_paved = registry:new_gauge("area_paved", "Area paved", { "tile", "surface" })
 
     gauges.pollution = registry:new_gauge("pollution", "Pollution level", { "surface" })
