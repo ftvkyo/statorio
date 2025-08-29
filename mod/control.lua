@@ -46,6 +46,14 @@ local function on_tile_mined(event)
     end
 end
 
+--- @param event EventData.on_rocket_launched
+local function on_rocket_launched(event)
+    local silo = event.rocket_silo
+    if silo ~= nil then
+        counters.rockets_launched:increment_by(1, { silo.surface.name, silo.force.name })
+    end
+end
+
 --- Every 1 second
 --- @param event NthTickEventData
 local function on_60th_tick(event)
@@ -104,6 +112,8 @@ local function load()
     counters.ticks_played = registry:new_counter("ticks_played", "Ticks passed")
     counters.player_deaths = registry:new_counter("player_deaths", "Player deaths", { "name" })
 
+    counters.rockets_launched = registry:new_counter("rockets_launched", "Rockets launched", { "surface", "force" })
+
     collect_metrics()
 end
 
@@ -129,6 +139,8 @@ script.on_event(defines.events.on_robot_built_tile, on_tile_built)
 
 script.on_event(defines.events.on_player_mined_tile, on_tile_mined)
 script.on_event(defines.events.on_robot_mined_tile, on_tile_mined)
+
+script.on_event(defines.events.on_rocket_launched, on_rocket_launched)
 
 script.on_nth_tick(60, on_60th_tick)
 script.on_nth_tick(600, on_600th_tick)
