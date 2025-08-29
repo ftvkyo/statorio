@@ -33,7 +33,7 @@ local function on_tile_built(event)
     local tile_name = event.tile.name
     local surface_name = game.get_surface(event.surface_index).name
 
-    gauges.area_paved:increment_by(#event.tiles, { tile_name, surface_name })
+    gauges.area_paved:increment_by(#event.tiles, { surface_name, tile_name })
 end
 
 --- @overload fun(event:EventData.on_player_mined_tile)
@@ -42,7 +42,7 @@ local function on_tile_mined(event)
     local surface_name = game.get_surface(event.surface_index).name
     for _, tile in ipairs(event.tiles) do
         local tile_name = tile.old_tile.name
-        gauges.area_paved:decrement_by(1, { tile_name, surface_name })
+        gauges.area_paved:decrement_by(1, { surface_name, tile_name })
     end
 end
 
@@ -63,11 +63,11 @@ local function on_600th_tick(event)
         local pollution_statistics = game.get_pollution_statistics(surface)
 
         for name, num in pairs(pollution_statistics.input_counts) do
-            gauges.pollution_produced:set(num, { name, surface.name })
+            gauges.pollution_produced:set(num, { surface.name, name })
         end
 
         for name, num in pairs(pollution_statistics.output_counts) do
-            gauges.pollution_consumed:set(num, { name, surface.name })
+            gauges.pollution_consumed:set(num, { surface.name, name })
         end
     end
 end
@@ -79,11 +79,11 @@ local function load()
     -- Unfortunately, this goes wrong if a nuke destroys some tiles.
     -- There seems to be no easy way to fix it other than recount all tiles on a surface when a nuke explodes.
     -- So for now this is allowed to get out of sync.
-    gauges.area_paved = registry:new_gauge("area_paved", "Area paved", { "tile", "surface" })
+    gauges.area_paved = registry:new_gauge("area_paved", "Area paved", { "surface", "tile" })
 
     gauges.pollution = registry:new_gauge("pollution", "Pollution level", { "surface" })
-    gauges.pollution_produced = registry:new_gauge("pollution_produced", "Pollution produced", { "name", "surface" })
-    gauges.pollution_consumed = registry:new_gauge("pollution_consumed", "Pollution consumed", { "name", "surface" })
+    gauges.pollution_produced = registry:new_gauge("pollution_produced", "Pollution produced", { "surface", "name" })
+    gauges.pollution_consumed = registry:new_gauge("pollution_consumed", "Pollution consumed", { "surface", "name" })
 
     counters.ticks_played = registry:new_counter("ticks_played", "Ticks passed")
     counters.player_deaths = registry:new_counter("player_deaths", "Player deaths", { "name" })
