@@ -69,6 +69,20 @@ local function on_600th_tick(event)
         for name, num in pairs(pollution_statistics.output_counts) do
             gauges.pollution_consumed:set(num, { surface.name, name })
         end
+
+        for _, force in pairs(game.forces) do
+            local evolution = force.get_evolution_factor(surface)
+
+            if evolution > 0 then
+                local evolution_by_killing_spawners = force.get_evolution_factor_by_killing_spawners(surface)
+                local evolution_by_pollution = force.get_evolution_factor_by_pollution(surface)
+                local evolution_by_time = force.get_evolution_factor_by_time(surface)
+
+                gauges.evolution:set(evolution_by_killing_spawners, { surface.name, force.name, "killing_spawners" })
+                gauges.evolution:set(evolution_by_pollution, { surface.name, force.name, "pollution" })
+                gauges.evolution:set(evolution_by_time, { surface.name, force.name, "time" })
+            end
+        end
     end
 end
 
@@ -84,6 +98,8 @@ local function load()
     gauges.pollution = registry:new_gauge("pollution", "Pollution level", { "surface" })
     gauges.pollution_produced = registry:new_gauge("pollution_produced", "Pollution produced", { "surface", "name" })
     gauges.pollution_consumed = registry:new_gauge("pollution_consumed", "Pollution consumed", { "surface", "name" })
+
+    gauges.evolution = registry:new_gauge("evolution", "Evolution level", { "surface", "force", "cause" })
 
     counters.ticks_played = registry:new_counter("ticks_played", "Ticks passed")
     counters.player_deaths = registry:new_counter("player_deaths", "Player deaths", { "name" })
