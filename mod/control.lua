@@ -65,37 +65,48 @@ local function on_60th_tick(event)
     collect_metrics()
 end
 
+--- @param surface LuaSurface
+local function refresh_pollution(surface)
+    local pollution = surface:get_total_pollution()
+    gauges.pollution:set(pollution, { surface.name })
+
+    local pollution_statistics = game.get_pollution_statistics(surface)
+
+    for name, num in pairs(pollution_statistics.input_counts) do
+        gauges.pollution_produced:set(num, { surface.name, name })
+    end
+
+    for name, num in pairs(pollution_statistics.output_counts) do
+        gauges.pollution_consumed:set(num, { surface.name, name })
+    end
+end
+
+--- @param surface LuaSurface
+local function refresh_evolution(surface)
+    local enemy = game.forces["enemy"]
+
+    if enemy ~= nil then
+        local evolution = enemy.get_evolution_factor(surface)
+        gauges.evolution:set(evolution, { surface.name })
+
+        local evolution_by_killing_spawners = enemy.get_evolution_factor_by_killing_spawners(surface)
+        gauges.evolution_by_cause:set(evolution_by_killing_spawners, { surface.name, "killing_spawners" })
+
+        local evolution_by_pollution = enemy.get_evolution_factor_by_pollution(surface)
+        gauges.evolution_by_cause:set(evolution_by_pollution, { surface.name, "pollution" })
+
+        local evolution_by_time = enemy.get_evolution_factor_by_time(surface)
+        gauges.evolution_by_cause:set(evolution_by_time, { surface.name, "time" })
+    end
+end
+
 --- Every 10 seconds
 --- @param event NthTickEventData
 local function on_600th_tick(event)
     for _, surface in pairs(game.surfaces) do
         if surface.pollutant_type ~= nil then
-            local pollution = surface:get_total_pollution()
-            gauges.pollution:set(pollution, { surface.name })
-
-            local pollution_statistics = game.get_pollution_statistics(surface)
-
-            for name, num in pairs(pollution_statistics.input_counts) do
-                gauges.pollution_produced:set(num, { surface.name, name })
-            end
-
-            for name, num in pairs(pollution_statistics.output_counts) do
-                gauges.pollution_consumed:set(num, { surface.name, name })
-            end
-        end
-
-        for _, force in pairs(game.forces) do
-            local evolution = force.get_evolution_factor(surface)
-
-            if evolution > 0 then
-                local evolution_by_killing_spawners = force.get_evolution_factor_by_killing_spawners(surface)
-                local evolution_by_pollution = force.get_evolution_factor_by_pollution(surface)
-                local evolution_by_time = force.get_evolution_factor_by_time(surface)
-
-                gauges.evolution:set(evolution_by_killing_spawners, { surface.name, force.name, "killing_spawners" })
-                gauges.evolution:set(evolution_by_pollution, { surface.name, force.name, "pollution" })
-                gauges.evolution:set(evolution_by_time, { surface.name, force.name, "time" })
-            end
+            refresh_pollution(surface)
+            refresh_evolution(surface)
         end
     end
 end
@@ -113,7 +124,8 @@ local function load()
     gauges.pollution_produced = registry:new_gauge("pollution_produced", "Pollution produced", { "surface", "name" })
     gauges.pollution_consumed = registry:new_gauge("pollution_consumed", "Pollution consumed", { "surface", "name" })
 
-    gauges.evolution = registry:new_gauge("evolution", "Evolution level", { "surface", "force", "cause" })
+    gauges.evolution = registry:new_gauge("evolution", "Evolution factor", { "surface" })
+    gauges.evolution_by_cause = registry:new_gauge("evolution_by_cause", "Evolution factor by cause", { "surface", "cause" })
 
     counters.ticks_played = registry:new_counter("ticks_played", "Ticks passed")
     counters.player_deaths = registry:new_counter("player_deaths", "Player deaths", { "force", "name" })
