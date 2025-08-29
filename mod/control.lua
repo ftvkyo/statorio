@@ -69,17 +69,19 @@ end
 --- @param event NthTickEventData
 local function on_600th_tick(event)
     for _, surface in pairs(game.surfaces) do
-        local pollution = surface:get_total_pollution()
-        gauges.pollution:set(pollution, { surface.name })
+        if surface.pollutant_type ~= nil then
+            local pollution = surface:get_total_pollution()
+            gauges.pollution:set(pollution, { surface.name })
 
-        local pollution_statistics = game.get_pollution_statistics(surface)
+            local pollution_statistics = game.get_pollution_statistics(surface)
 
-        for name, num in pairs(pollution_statistics.input_counts) do
-            gauges.pollution_produced:set(num, { surface.name, name })
-        end
+            for name, num in pairs(pollution_statistics.input_counts) do
+                gauges.pollution_produced:set(num, { surface.name, name })
+            end
 
-        for name, num in pairs(pollution_statistics.output_counts) do
-            gauges.pollution_consumed:set(num, { surface.name, name })
+            for name, num in pairs(pollution_statistics.output_counts) do
+                gauges.pollution_consumed:set(num, { surface.name, name })
+            end
         end
 
         for _, force in pairs(game.forces) do
