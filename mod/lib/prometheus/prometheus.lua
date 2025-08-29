@@ -1,11 +1,14 @@
 --- @param str string
+--- @return string
 local function escape_string(str)
-    return str:gsub("\\", "\\\\"):gsub("\n", "\\n"):gsub('"', '\\"')
+    str, _ = str:gsub("\\", "\\\\"):gsub("\n", "\\n"):gsub('"', '\\"')
+    return str
 end
 
 --- @param names string[]
 --- @param values (string|number|boolean)[]
---- @overload fun(names:nil, values:nil)
+--- @return string
+--- @overload fun(names:nil, values:nil): string
 local function labels_to_key(names, values)
     if names == nil and values == nil then
         return ""
@@ -29,6 +32,7 @@ local function labels_to_key(names, values)
 end
 
 --- @param value number
+--- @return string
 local function metric_to_string(value)
     if value == math.huge then
         return "+Inf"
