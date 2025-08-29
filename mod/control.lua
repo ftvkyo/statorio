@@ -58,6 +58,11 @@ local function on_rocket_launched(event)
     end
 end
 
+--- @param event EventData.on_research_finished
+local function on_research_finished(event)
+    counters.researches_finished:increment_by(1, { event.research.force.name })
+end
+
 --- Every 1 second
 --- @param event NthTickEventData
 local function on_60th_tick(event)
@@ -131,6 +136,7 @@ local function load()
     counters.player_deaths = registry:new_counter("player_deaths", "Player deaths", { "force", "name" })
 
     counters.rockets_launched = registry:new_counter("rockets_launched", "Rockets launched", { "surface", "force" })
+    counters.researches_finished = registry:new_counter("researches_finished", "Researches finished", { "force" })
 
     collect_metrics()
 end
@@ -159,6 +165,7 @@ script.on_event(defines.events.on_player_mined_tile, on_tile_mined)
 script.on_event(defines.events.on_robot_mined_tile, on_tile_mined)
 
 script.on_event(defines.events.on_rocket_launched, on_rocket_launched)
+script.on_event(defines.events.on_research_finished, on_research_finished)
 
 script.on_nth_tick(60, on_60th_tick)
 script.on_nth_tick(600, on_600th_tick)
