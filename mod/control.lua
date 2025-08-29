@@ -23,8 +23,10 @@ end
 
 --- @param event EventData.on_player_died
 local function on_player_died(event)
-    local player_name = game.get_player(event.player_index).name
-    counters.player_deaths:increment_by(1, { player_name })
+    local player = game.get_player(event.player_index)
+    if player ~= nil then
+        counters.player_deaths:increment_by(1, { player.force.name, player.name })
+    end
 end
 
 --- @overload fun(event:EventData.on_player_built_tile)
@@ -110,7 +112,7 @@ local function load()
     gauges.evolution = registry:new_gauge("evolution", "Evolution level", { "surface", "force", "cause" })
 
     counters.ticks_played = registry:new_counter("ticks_played", "Ticks passed")
-    counters.player_deaths = registry:new_counter("player_deaths", "Player deaths", { "name" })
+    counters.player_deaths = registry:new_counter("player_deaths", "Player deaths", { "force", "name" })
 
     counters.rockets_launched = registry:new_counter("rockets_launched", "Rockets launched", { "surface", "force" })
 
