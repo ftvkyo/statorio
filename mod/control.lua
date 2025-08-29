@@ -32,19 +32,21 @@ end
 --- @overload fun(event:EventData.on_player_built_tile)
 --- @overload fun(event:EventData.on_robot_built_tile)
 local function on_tile_built(event)
-    local tile_name = event.tile.name
-    local surface_name = game.get_surface(event.surface_index).name
-
-    gauges.area_paved:increment_by(#event.tiles, { surface_name, tile_name })
+    local tile = event.tile
+    local surface = game.get_surface(event.surface_index)
+    if surface ~= nil then
+        gauges.area_paved:increment_by(#event.tiles, { surface.name, tile.name })
+    end
 end
 
 --- @overload fun(event:EventData.on_player_mined_tile)
 --- @overload fun(event:EventData.on_robot_mined_tile)
 local function on_tile_mined(event)
-    local surface_name = game.get_surface(event.surface_index).name
-    for _, tile in ipairs(event.tiles) do
-        local tile_name = tile.old_tile.name
-        gauges.area_paved:decrement_by(1, { surface_name, tile_name })
+    local surface = game.get_surface(event.surface_index)
+    if surface ~= nil then
+        for _, tile in ipairs(event.tiles) do
+            gauges.area_paved:decrement_by(1, { surface.name, tile.old_tile.name })
+        end
     end
 end
 
