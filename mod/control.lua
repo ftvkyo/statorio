@@ -105,6 +105,17 @@ local function refresh_evolution(surface)
     end
 end
 
+--- @param surface LuaSurface
+local function refresh_kills(surface)
+    for _, force in pairs(game.forces) do
+        local kill_statistics = force.get_kill_count_statistics(surface)
+
+        for entity_name, num in pairs(kill_statistics.output_counts) do
+            gauges.kills:set(num, { surface.name, force.name, entity_name })
+        end
+    end
+end
+
 --- Every 10 seconds
 --- @param event NthTickEventData
 local function on_600th_tick(event)
@@ -113,6 +124,8 @@ local function on_600th_tick(event)
             refresh_pollution(surface)
             refresh_evolution(surface)
         end
+
+        refresh_kills(surface)
     end
 end
 
@@ -131,6 +144,8 @@ local function load()
 
     gauges.evolution = registry:new_gauge("evolution", "Evolution factor", { "surface" })
     gauges.evolution_by_cause = registry:new_gauge("evolution_by_cause", "Evolution factor by cause", { "surface", "cause" })
+
+    gauges.kills = registry:new_gauge("kills", "Kills", { "surface", "force", "entity" })
 
     counters.ticks_played = registry:new_counter("ticks_played", "Ticks passed")
     counters.player_deaths = registry:new_counter("player_deaths", "Player deaths", { "force", "name" })
