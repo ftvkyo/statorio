@@ -109,7 +109,7 @@ end
 --- @param num number
 --- @param label_values? (string|number|boolean)[]
 function Gauge:decrement_by(num, label_values)
-    assert(num >= 0, "Tried to dercement by a negative value")
+    assert(num >= 0, "Tried to decrement by a negative value")
 
     local label_key = labels_to_key(self.label_names, label_values)
     local old_num = self.observations[label_key] or 0
@@ -183,7 +183,7 @@ end
 --- @param num number
 --- @param label_values? (string|number|boolean)[]
 function Counter:increment_by(num, label_values)
-    assert(num >= 0, "Tried to decrement a counter")
+    assert(num >= 0, "Tried to increment by a negative value")
 
     local label_key = labels_to_key(self.label_names, label_values)
     local old_num = self.observations[label_key] or 0
