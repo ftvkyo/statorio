@@ -6,7 +6,6 @@ local gauges = {}
 local counters = {}
 
 local function collect_metrics()
-    -- helpers.write_file("statorio/game.prom", registry:collect_metrics(), false, 0)
     helpers.write_file("statorio/game.prom", registry:collect_metrics(), false)
 end
 
@@ -244,6 +243,7 @@ script.on_nth_tick(18000, on_18000th_tick)
 
 script.on_init(init)
 
--- TODO: check if this is a legitimate use of `on_load`
--- See https://lua-api.factorio.com/latest/classes/LuaBootstrap.html#on_load
+-- `load()` only reads `storage` (available here) and calls `helpers.write_file`
+-- (safe outside of game-state context); it never touches `game`, which is nil
+-- during `on_load`. See https://lua-api.factorio.com/latest/classes/LuaBootstrap.html#on_load
 script.on_load(load)
