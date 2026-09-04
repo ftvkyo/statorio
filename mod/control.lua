@@ -29,6 +29,34 @@ local function on_player_died(event)
     end
 end
 
+--- Only tiles placeable by an item (concrete, stone-path, landfill, etc.)
+--- count as "pavement". Natural terrain tiles are never placed this way, so
+--- this also guards `pavement_tiles_seen` against ever recording one -
+--- `refresh_area_paved` recounts a tracked tile across the whole surface,
+--- and a natural tile slipping in there would misreport most of the map.
+--- @param tile_name string
+--- @return boolean
+local function is_pavement_tile(tile_name)
+    local proto = prototypes.tile[tile_name]
+    return proto ~= nil and next(proto.items_to_place_this or {}) ~= nil
+end
+
+--- @param surface_index uint
+--- @param tile_name string
+local function mark_pavement_tile_seen(surface_index, tile_name)
+    if not is_pavement_tile(tile_name) then
+        return
+    end
+
+    local seen = storage.pavement_tiles_seen[surface_index]
+    if seen == nil then
+        seen = {}
+        storage.pavement_tiles_seen[surface_index] = seen
+    end
+
+    seen[tile_name] = true
+end
+
 --- @overload fun(event:EventData.on_player_built_tile)
 --- @overload fun(event:EventData.on_robot_built_tile)
 local function on_tile_built(event)
@@ -36,6 +64,7 @@ local function on_tile_built(event)
     local surface = game.get_surface(event.surface_index)
     if surface ~= nil then
         gauges.area_paved:increment_by(#event.tiles, { surface.name, tile.name })
+        mark_pavement_tile_seen(event.surface_index, tile.name)
     end
 end
 
@@ -46,7 +75,24 @@ local function on_tile_mined(event)
     if surface ~= nil then
         for _, tile in ipairs(event.tiles) do
             gauges.area_paved:decrement_by(1, { surface.name, tile.old_tile.name })
+            mark_pavement_tile_seen(event.surface_index, tile.old_tile.name)
         end
+    end
+end
+
+--- Recounts tracked pavement tiles from live game state, correcting any
+--- drift from tile destruction that bypasses the built/mined tile events
+--- (e.g. nukes, reactor explosions - see on_18000th_tick).
+--- @param surface LuaSurface
+local function refresh_area_paved(surface)
+    local seen = storage.pavement_tiles_seen[surface.index]
+    if seen == nil then
+        return
+    end
+
+    for tile_name, _ in pairs(seen) do
+        local count = surface.count_tiles_filtered({ name = tile_name })
+        gauges.area_paved:set(count, { surface.name, tile_name })
     end
 end
 
@@ -129,13 +175,19 @@ local function on_600th_tick(event)
     end
 end
 
+--- Every 5 minutes. Corrects area_paved drift from tile destruction that
+--- bypasses the built/mined tile events (nukes, reactor explosions, etc.).
+--- @param event NthTickEventData
+local function on_18000th_tick(event)
+    for _, surface in pairs(game.surfaces) do
+        refresh_area_paved(surface)
+    end
+end
+
 local function load()
     gauges.players_connected = registry:new_gauge("players_connected", "Players connected")
     gauges.players_total = registry:new_gauge("players_total", "Players total")
 
-    -- Unfortunately, this goes wrong if a nuke destroys some tiles.
-    -- There seems to be no easy way to fix it other than recount all tiles on a surface when a nuke explodes.
-    -- So for now this is allowed to get out of sync.
     gauges.area_paved = registry:new_gauge("area_paved", "Area paved", { "surface", "tile" })
 
     gauges.pollution = registry:new_gauge("pollution", "Pollution level", { "surface" })
@@ -161,6 +213,10 @@ local function init()
         storage.registry = {}
     end
 
+    if not storage.pavement_tiles_seen then
+        storage.pavement_tiles_seen = {}
+    end
+
     load()
 end
 
@@ -184,6 +240,7 @@ script.on_event(defines.events.on_research_finished, on_research_finished)
 
 script.on_nth_tick(60, on_60th_tick)
 script.on_nth_tick(600, on_600th_tick)
+script.on_nth_tick(18000, on_18000th_tick)
 
 script.on_init(init)
 
