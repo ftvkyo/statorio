@@ -217,6 +217,11 @@ local function init()
     end
 
     load()
+
+    -- Populate player counts immediately instead of waiting for the first
+    -- join/leave event; `game` isn't available yet in `load()` on the
+    -- `on_load` path, so this can only happen here on `on_init`.
+    on_player_change()
 end
 
 script.on_event(defines.events.on_player_joined_game, on_player_change)
