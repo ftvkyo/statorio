@@ -161,6 +161,31 @@ local function refresh_kills(surface)
     end
 end
 
+--- @param surface LuaSurface
+local function refresh_production(surface)
+    for _, force in pairs(game.forces) do
+        local item_statistics = force.get_item_production_statistics(surface)
+
+        for name, num in pairs(item_statistics.input_counts) do
+            gauges.item_produced:set(num, { surface.name, force.name, name })
+        end
+
+        for name, num in pairs(item_statistics.output_counts) do
+            gauges.item_consumed:set(num, { surface.name, force.name, name })
+        end
+
+        local fluid_statistics = force.get_fluid_production_statistics(surface)
+
+        for name, num in pairs(fluid_statistics.input_counts) do
+            gauges.fluid_produced:set(num, { surface.name, force.name, name })
+        end
+
+        for name, num in pairs(fluid_statistics.output_counts) do
+            gauges.fluid_consumed:set(num, { surface.name, force.name, name })
+        end
+    end
+end
+
 --- Every 10 seconds
 --- @param event NthTickEventData
 local function on_600th_tick(event)
@@ -171,6 +196,7 @@ local function on_600th_tick(event)
         end
 
         refresh_kills(surface)
+        refresh_production(surface)
     end
 end
 
@@ -197,6 +223,11 @@ local function load()
     gauges.evolution_by_cause = registry:new_gauge("evolution_by_cause", "Evolution factor by cause", { "surface", "cause" })
 
     gauges.kills = registry:new_gauge("kills", "Kills", { "surface", "force", "entity" })
+
+    gauges.item_produced = registry:new_gauge("item_produced", "Items produced", { "surface", "force", "name" })
+    gauges.item_consumed = registry:new_gauge("item_consumed", "Items consumed", { "surface", "force", "name" })
+    gauges.fluid_produced = registry:new_gauge("fluid_produced", "Fluids produced", { "surface", "force", "name" })
+    gauges.fluid_consumed = registry:new_gauge("fluid_consumed", "Fluids consumed", { "surface", "force", "name" })
 
     counters.ticks_played = registry:new_counter("ticks_played", "Ticks passed")
     counters.player_deaths = registry:new_counter("player_deaths", "Player deaths", { "force", "name" })
