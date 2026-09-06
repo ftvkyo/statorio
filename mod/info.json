@@ -3,7 +3,7 @@
     "version": "0.0.3",
     "title": "statorio",
     "author": "ftvkyo",
-    "description": "",
+    "description": "Exports live game metrics (production, pollution, evolution, kills, players, and more) to Prometheus for use with Grafana.",
     "homepage": "https://github.com/ftvkyo/statorio",
     "dependencies": [],
     "factorio_version": "2.1"

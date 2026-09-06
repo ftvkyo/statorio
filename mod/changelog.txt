@@ -1,0 +1,28 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.0.3
+Date: 2026-09-05
+  Features:
+    - Track item and fluid production/consumption per surface and force.
+  Bugfixes:
+    - Correct area_paved drift caused by nukes/reactor explosions destroying tiles outside the
+      normal built/mined tile events.
+    - Populate player count gauges immediately on init instead of waiting for the first join/leave
+      event.
+    - Fix misleading/incorrect assert messages in the Prometheus library.
+  Changes:
+    - Update to Factorio 2.1.
+---------------------------------------------------------------------------------------------------
+Version: 0.0.2
+Date: 2025-08-30
+  Features:
+    - Track kills per surface, force, and entity.
+---------------------------------------------------------------------------------------------------
+Version: 0.0.1
+Date: 2025-08-22
+  Major Features:
+    - Initial release.
+    - Track connected/total players and player deaths.
+    - Track area paved per surface and tile type.
+    - Track pollution level, production, and consumption per surface.
+    - Track evolution factor per surface, broken down by cause.
+    - Track rockets launched and researches finished.
