@@ -6,7 +6,7 @@ local gauges = {}
 local counters = {}
 
 local function collect_metrics()
-    helpers.write_file("statorio/game.prom", registry:collect_metrics(), false)
+    helpers.write_file("statfactory/game.prom", registry:collect_metrics(), false)
 end
 
 --- @overload fun(event:EventData.on_player_joined_game)

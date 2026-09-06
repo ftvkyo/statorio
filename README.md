@@ -1,4 +1,4 @@
-# statorio
+# statfactory
 
 This mod is based on [`graftorio2`](https://github.com/remijouannet/graftorio2).
 See [Attribution](#attribution).
@@ -45,7 +45,7 @@ export FACTORIO_APPDIR="$HOME/Library/Application Support/factorio"
 ```sh
 mkdir -p "$FACTORIO_APPDIR/mods"
 # Note: the directory name MUST be `{mod-name}_{version}`.
-rm -rf "$FACTORIO_APPDIR/mods/statorio_0.0.1" && cp -r mod "$FACTORIO_APPDIR/mods/statorio_0.0.1"
+rm -rf "$FACTORIO_APPDIR/mods/statfactory_0.0.1" && cp -r mod "$FACTORIO_APPDIR/mods/statfactory_0.0.1"
 ```
 
 Then you can enable the mod in-game.
@@ -56,10 +56,10 @@ When the mod is loaded and a savefile is running, the mod will periodically writ
 You can display the contents of the file for debugging purposes:
 
 ```sh
-cat "$FACTORIO_APPDIR/script-output/statorio/game.prom"
+cat "$FACTORIO_APPDIR/script-output/statfactory/game.prom"
 
 # You can also use `watch`:
-watch -n 1 cat "$FACTORIO_APPDIR/script-output/statorio/game.prom"
+watch -n 1 cat "$FACTORIO_APPDIR/script-output/statfactory/game.prom"
 ```
 
 Once the file is there, you can set up Prometheus and Grafana:
