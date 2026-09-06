@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+jobs:
+  validate-info:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate info.json
+        run: |
+          jq empty mod/info.json
+
+          for field in name version title author factorio_version; do
+            val=$(jq -r --arg f "$field" '.[$f] // empty' mod/info.json)
+            if [ -z "$val" ]; then
+              echo "::error file=mod/info.json::missing required field '$field'"
+              exit 1
+            fi
+          done
+
+  luacheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install luacheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y luarocks
+          sudo luarocks install luacheck
+
+      - name: Run luacheck
+        run: luacheck mod/control.lua mod/lib/prometheus/prometheus.lua

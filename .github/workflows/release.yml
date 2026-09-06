@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check tag matches info.json version
+        id: version
+        run: |
+          version=$(jq -r .version mod/info.json)
+          name=$(jq -r .name mod/info.json)
+          tag="${GITHUB_REF_NAME#v}"
+
+          if [ "$tag" != "$version" ]; then
+            echo "::error::tag v$tag does not match mod/info.json version $version"
+            exit 1
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "stage=${name}_${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Build mod zip
+        run: |
+          stage="${{ steps.version.outputs.stage }}"
+          mkdir -p "build/$stage"
+          cp -r mod/* "build/$stage/"
+          (cd build && zip -r "../${stage}.zip" "$stage")
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.version.outputs.stage }}.zip
+          generate_release_notes: true
+
+      - name: Publish to the Factorio mod portal
+        env:
+          FACTORIO_API_KEY: ${{ secrets.FACTORIO_API_KEY }}
+        run: |
+          name="${{ steps.version.outputs.name }}"
+          zip_file="${{ steps.version.outputs.stage }}.zip"
+
+          upload_url=$(curl -fsS -X POST \
+            -H "Authorization: Bearer ${FACTORIO_API_KEY}" \
+            -F "mod=${name}" \
+            https://mods.factorio.com/api/v2/mods/releases/init_upload | jq -r .upload_url)
+
+          if [ -z "$upload_url" ] || [ "$upload_url" = "null" ]; then
+            echo "::error::failed to get upload_url from init_upload"
+            exit 1
+          fi
+
+          curl -fsS -X POST -F "file=@${zip_file}" "$upload_url"
